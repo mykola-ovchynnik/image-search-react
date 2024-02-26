@@ -16,23 +16,29 @@ const App = () => {
   const [isShowModal, setIsShowModal] = useState(false);
   const [largeImage, setLargeImage] = useState('');
 
-  const getImages = async () => {
-    try {
-      setLoading(true);
-      const { hits, totalHits } = await serviceGetImages(query, page);
-      setImages(prevImages => [...prevImages, ...hits]);
-      setLoadMore(page < Math.ceil(totalHits / 12));
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const { hits, totalHits } = await serviceGetImages(query, page);
+        setImages(prevImages => [...prevImages, ...hits]);
+        setLoadMore(page < Math.ceil(totalHits / 12));
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (page > 1 || query) {
+      fetchData();
     }
-  };
+  }, [page, query]);
 
   const onSubmit = query => {
     setQuery(query);
-    setImages([]);
     setPage(1);
+    setImages([]);
     setLoadMore(false);
   };
 
@@ -48,12 +54,6 @@ const App = () => {
   const closeModal = () => {
     setIsShowModal(false);
   };
-
-  useEffect(() => {
-    if (page !== 1 || query !== '') {
-      getImages();
-    }
-  }, [page, query]);
 
   return (
     <Container>
