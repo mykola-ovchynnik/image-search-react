@@ -6,6 +6,7 @@ import LoadMoreButton from '../Button/Button';
 import Modal from '../Modal/Modal';
 import { serviceGetImages } from 'api/api';
 import { Grid } from '../Loader/Loader';
+import { handleError } from 'helpers/helpers';
 
 const App = () => {
   const [loading, setLoading] = useState(false);
@@ -17,22 +18,26 @@ const App = () => {
   const [largeImage, setLargeImage] = useState('');
 
   useEffect(() => {
+    if (!query) {
+      return;
+    }
+
     const fetchData = async () => {
       try {
         setLoading(true);
+
         const { hits, totalHits } = await serviceGetImages(query, page);
+
         setImages(prevImages => [...prevImages, ...hits]);
         setLoadMore(page < Math.ceil(totalHits / 12));
       } catch (error) {
-        console.log(error);
+        handleError(error);
       } finally {
         setLoading(false);
       }
     };
 
-    if (page > 1 || query) {
-      fetchData();
-    }
+    fetchData();
   }, [page, query]);
 
   const onSubmit = query => {
